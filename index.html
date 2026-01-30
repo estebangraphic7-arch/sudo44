@@ -2,172 +2,310 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>SUDO44 – Beta</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>SUDO44 – Juego HTML Beta</title>
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #000;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
+*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{
+  margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(270deg,#ff9a2f,#ff7a00,#ff6a00);
+  background-size:400% 400%;animation:bgMove 14s ease infinite
+}
+@keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes pulse44{0%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:.85}100%{transform:scale(1);opacity:1}}
 
-  .screen {
-    display: none;
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    text-align: center;
-  }
+/* LOADER BRANDING */
+#loader{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;z-index:50;text-align:center;padding:20px}
+#loader h1{font-size:64px;margin:0;font-weight:900;animation:pulse44 1.4s ease-in-out infinite}
+#loader p{margin:10px 0;font-size:18px;max-width:520px}
+#startBtn{margin-top:24px;padding:16px 32px;border:none;border-radius:40px;font-size:18px;font-weight:bold;background:#fff;color:#ff6a00;cursor:pointer}
 
-  .active {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+.screen{display:none;flex-direction:column;justify-content:center;align-items:center;width:100%;height:100%}
+.active{display:flex}
+#game{flex-direction:column;align-items:center;width:100%;max-width:460px;padding:20px}
+#header{width:100%;margin-bottom:20px}
+.sudoku-brand{
+  width:100%;
+  min-height:500px;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  margin-bottom:16px;
+  overflow:hidden;
+}
 
-  h1 {
-    font-size: clamp(3rem, 12vw, 8rem);
-    margin-bottom: 10px;
-    letter-spacing: 0.1em;
-  }
+@media (max-width: 480px){
+  .sudoku-brand{min-height:500px}
+}
+}
+.sudoku-brand img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:14px;
+  display:block;
+}
+#header img{width:100%;border-radius:14px}
+#instructions{font-size:20px;line-height:1.5;text-align:center;margin-bottom:18px;color:#000;background:#fff;border-radius:14px;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%}
+.cell{border-radius:10px}
+.cell input{width:100%;aspect-ratio:1/1;text-align:center;font-size:22px;font-weight:bold;border-radius:10px;border:2px solid #ff6a00}
+.cell input[disabled]{background:#ffe2c7}
+.cell.resolved input{
+  background: rgba(255,122,0,0.5);
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  animation: hit44 .4s ease-in-out
+}
+@keyframes hit44{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+#status{margin-top:14px;color:#fff;font-weight:bold;text-align:center}
+#footer{margin-top:18px;text-align:center;font-family:Montserrat,Arial,sans-serif;font-style:italic;font-weight:900;color:#fff}
 
-  p {
-    max-width: 600px;
-    font-size: 16px;
-    line-height: 1.4;
-    opacity: 0.9;
-  }
+/* MOCKUP FLOTANTE PASO A PASO */
+.mockup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.96);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:40;padding:24px}
+.mockup .card{background:#fff;border-radius:18px;max-width:520px;width:100%;padding:24px;box-shadow:0 20px 40px rgba(0,0,0,.25);text-align:center}
+.step-title{font-size:22px;font-weight:900;margin-bottom:10px;color:#000}
+.step-text{font-size:18px;color:#000;line-height:1.4}
+.step-controls{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.step-controls button{padding:12px 20px;font-size:16px;border:none;border-radius:30px;background:#ff6a00;color:#fff;cursor:pointer}
+.step-controls .secondary{background:#000;color:#fff}
 
-  button {
-    margin-top: 30px;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    background: #fff;
-    color: #000;
-  }
+/* POPUP FINAL */
+#finalPopup{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;z-index:60}
+#finalPopup .card{background:#fff;border-radius:20px;max-width:420px;width:90%;padding:24px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.3)}
+#finalPopup h2{margin-top:0;color:#ff6a00;font-size:28px}
+#finalPopup p{color:#000;font-size:18px;line-height:1.4}
+#finalPopup button{margin-top:16px;padding:12px 24px;border:none;border-radius:30px;background:#ff6a00;color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
 
-  /* Loader */
-  .loader {
-    font-size: 18px;
-    margin-top: 20px;
-    animation: blink 1.5s infinite;
-  }
+/* ALERTA ERROR */
+#errorMark{position:fixed;inset:0;display:none;justify-content:center;align-items:center;z-index:55;pointer-events:none}
+#errorMark span{font-size:120px;color:#fff;background:#000000aa;border-radius:50%;width:160px;height:160px;display:flex;justify-content:center;align-items:center}
 
-  @keyframes blink {
-    0% {opacity: 1;}
-    50% {opacity: .3;}
-    100% {opacity: 1;}
-  }
-
-  /* Juego */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-top: 30px;
-  }
-
-  .cell {
-    background: #111;
-    border: 2px solid #fff;
-    font-size: 3rem;
-    padding: 40px;
-    cursor: pointer;
-  }
-
-  .cell.active {
-    background: orange;
-    color: #000;
-  }
-
-  footer {
-    position: absolute;
-    bottom: 10px;
-    font-size: 12px;
-    font-style: italic;
-    opacity: 0.8;
-  }
+/* POPUP OK BLOQUE */
+#okMark{position:fixed;inset:0;display:none;justify-content:center;align-items:center;z-index:56;pointer-events:none}
+#okMark span{font-size:120px;color:#fff;background:rgba(0,160,70,.9);border-radius:50%;width:160px;height:160px;display:flex;justify-content:center;align-items:center}
+#errorMark span{font-size:120px;color:#fff;background:#000000aa;border-radius:50%;width:160px;height:160px;display:flex;justify-content:center;align-items:center}
 </style>
 </head>
-
 <body>
 
-<!-- LOADER -->
-<div class="screen active" id="loader">
-  <h1>SUDO44</h1>
-  <p>
-    ¡Bienvenido al reto!<br><br>
-    Aquí no se trata solo de jugar,<br>
-    se trata de pensar diferente.<br><br>
-    Pon a prueba tu lógica, tu concentración<br>
-    y tu visión de futuro.
-  </p>
-  <div class="loader">Cargando el juego...</div>
-</div>
-
-<!-- INSTRUCCIONES -->
-<div class="screen" id="instructions">
-  <h1>¿Cómo jugar?</h1>
-  <p>
-    Este es un reto rápido de concentración.<br><br>
-    Debes activar todas las casillas del tablero 2x2.<br>
-    Cuando lo logres, el número 44 aparecerá marcado.<br><br>
-    No es solo un juego.<br>
-    Es una decisión.
-  </p>
-  <button onclick="startGame()">Iniciar juego</button>
-</div>
-
-<!-- JUEGO -->
-<div class="screen" id="game">
-  <h1>44</h1>
-
-  <div class="grid">
-    <div class="cell" onclick="toggle(this)"></div>
-    <div class="cell" onclick="toggle(this)"></div>
-    <div class="cell" onclick="toggle(this)"></div>
-    <div class="cell" onclick="toggle(this)"></div>
+<div id="loader" class="screen active">
+  <div class="loader-brand" style="margin-bottom:16px;width:100%;max-width:320px">
+<img src="logo-loader.png" alt="Logo campaña" style="width:100%">
   </div>
-
-  <footer>
-    Este 8 de marzo marca el #44 en el tarjetón.<br>
-    Juega, comparte y haz que este reto se vuelva viral.
-  </footer>
+  <h1>SUDO44</h1>
+  <p>¡Bienvenido al reto!<br>Aquí no se trata solo de jugar, se trata de pensar diferente.</p>
+  <p>Pon a prueba tu lógica, tu concentración y tu visión de futuro.</p>
+  <button id="startBtn">Iniciar juego</button>
 </div>
+
+<!-- MOCKUP FLOTANTE INSTRUCCIONES -->
+<div id="mockup" class="mockup" style="display:none;">
+  <div class="card">
+    <div id="stepTitle" class="step-title">¿Qué es SUDO44?</div>
+    <div id="stepText" class="step-text">
+      SUDO44 es un <strong>sudoku simplificado 2×2</strong>.
+      No necesitas experiencia previa para jugar.
+    </div>
+    <div class="step-controls">
+      <button id="prevStep" class="secondary">Volver</button>
+      <button id="nextStep">Siguiente</button>
+      <button id="skipSteps" class="secondary">Saltar</button>
+    </div>
+  </div>
+</div>
+
+<div id="game" class="screen">
+  <div id="header">
+    <div class="sudoku-brand" style="width:100%;margin-bottom:12px">
+<img src="banner-sudoku.png" alt="Banner campaña">
+    </div>
+    <!-- Cargar imagen aquí -->
+    <!-- <img src="header.png" alt="Banner"> -->
+  </div>
+  <div id="instructions">
+    Completa cada bloque <strong>2×2</strong> para que la suma sea <strong>44</strong>.<br>
+    Usa números del <strong>1 al 22</strong>.<br>
+    No repitas números.
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="status"></div>
+  <div id="footer">
+    Este 8 de marzo marca el <strong>#44</strong> en el tarjetón del SENADO y comparte el reto
+  </div>
+</div>
+
+<!-- POPUP FINAL -->
+<div id="finalPopup">
+  <div class="card">
+    <h2>¡Felicitaciones!</h2>
+    <p>Completaste el reto SUDO44.<br><br>
+    Pensar diferente también es elegir diferente.</p>
+    <p><strong>Este 8 de marzo marca el #44</strong><br>en el tarjetón del Senado.</p>
+    <button onclick="closeFinal()">Cerrar</button>
+  </div>
+</div>
+
+<!-- ALERTA ERROR -->
+<div id="errorMark"><span>✕</span></div>
+
+<!-- ALERTA OK -->
+<div id="okMark"><span>✓</span></div>
 
 <script>
-  // Loader automático
-  setTimeout(() => {
-    document.getElementById("loader").classList.remove("active");
-    document.getElementById("instructions").classList.add("active");
-  }, 3000);
+const TARGET_SUM=44;
+const SOLUTION=[1,22,11,10,21,2,12,9,8,15,7,14,16,5,13,10];
+const gridEl=document.getElementById('grid');
+const statusEl=document.getElementById('status');
+const loader=document.getElementById('loader');
+const mockup=document.getElementById('mockup');
+const gameScreen=document.getElementById('game');
+const stepTitle=document.getElementById('stepTitle');
+const stepText=document.getElementById('stepText');
+const prevStepBtn=document.getElementById('prevStep');
+const nextStepBtn=document.getElementById('nextStep');
+const skipStepsBtn=document.getElementById('skipSteps');
 
-  function startGame() {
-    document.getElementById("instructions").classList.remove("active");
-    document.getElementById("game").classList.add("active");
+loader.querySelector('#startBtn').onclick=()=>{
+  loader.style.display='none';
+  mockup.style.display='flex';
+};
+
+// Paso a paso contenido
+const steps=[
+  {title:'¿Qué es SUDO44?',text:'SUDO44 es un <strong>sudoku simplificado 2×2</strong>. No necesitas experiencia previa para jugar.'},
+  {title:'Así se ve un sudoku 2×2',text:'<div style="display:grid;grid-template-columns:repeat(2,40px);gap:4px;justify-content:center;margin:14px 0">'+
+    '<div style="border:2px solid #ff6a00;width:40px;height:40px"></div>'.repeat(4)+
+    '</div><p>Este es un <strong>bloque 2×2</strong>. Cada bloque debe sumar <strong>44</strong>.</p>'},
+  {title:'Objetivo del juego',text:'Cada bloque de <strong>4 casillas (2×2)</strong> debe sumar exactamente <strong>44</strong>.'},
+  {title:'Reglas básicas',text:'Usa números del <strong>1 al 22</strong> y <strong>no repitas</strong> ningún número.'},
+  {title:'Cómo saber si vas bien',text:'Cuando un bloque esté correcto, se marcará en <strong>naranja</strong>.'}
+];
+let currentStep=0;
+
+function showStep(){
+  stepTitle.innerHTML=steps[currentStep].title;
+  stepText.innerHTML=steps[currentStep].text;
+  prevStepBtn.style.display=currentStep===0?'none':'inline-block';
+}
+
+showStep();
+
+loader.querySelector('#startBtn').onclick=()=>{
+  loader.style.display='none';
+  mockup.style.display='flex';
+  currentStep=0;
+  showStep();
+};
+
+nextStepBtn.onclick=()=>{
+  if(currentStep<steps.length-1){currentStep++;showStep();}
+  else startGame();
+};
+
+prevStepBtn.onclick=()=>{if(currentStep>0){currentStep--;showStep();}};
+
+skipStepsBtn.onclick=()=>startGame();
+
+function startGame(){
+  mockup.style.display='none';
+  gameScreen.classList.add('active');
+  initGame();
+}
+
+function initGame(){
+  gridEl.innerHTML='';
+  statusEl.textContent='';
+  const hints=[...Array(16).keys()].sort(()=>Math.random()-0.5).slice(0,4);
+
+  for(let i=0;i<16;i++){
+    const cell=document.createElement('div');
+    cell.className='cell';
+    const row=Math.floor(i/4);
+    const col=i%4;
+    if(row===1) cell.style.borderBottom='1.5px solid #000';
+    if(col===1) cell.style.borderRight='1.5px solid #000';
+
+    const input=document.createElement('input');
+    input.type='number';input.min=1;input.max=22;
+    if(hints.includes(i)){
+      input.value=SOLUTION[i];
+      input.disabled=true;
+    }
+    input.oninput=check;
+    cell.appendChild(input);
+    gridEl.appendChild(cell);
+  }
+}
+
+function check(){
+  const inputs=[...gridEl.querySelectorAll('input')];
+  const values=inputs.map(i=>Number(i.value)||0);
+
+  const used=values.filter(v=>v>0);
+  if(new Set(used).size!==used.length){
+    statusEl.textContent='No repitas números';
+    return;
   }
 
-  function toggle(cell) {
-    cell.classList.toggle("active");
+  let correctBlocks=0;
+  let showBlockError=false;
 
-    const cells = document.querySelectorAll(".cell");
-    const allActive = [...cells].every(c => c.classList.contains("active"));
+  for(let r=0;r<4;r+=2){
+    for(let c=0;c<4;c+=2){
+      const idx=[r*4+c,r*4+c+1,(r+1)*4+c,(r+1)*4+c+1];
+      const cells=idx.map(i=>gridEl.children[i]);
+      const filled=idx.every(i=>values[i]>0);
+      const sum=idx.reduce((a,i)=>a+values[i],0);
 
-    if (allActive) {
-      alert("Reto completado. El 44 ya está marcado.");
+      const alreadyResolved=cells.every(cell=>cell.classList.contains('resolved'));
+
+      // Si el bloque estaba resuelto y se cambia un número, se libera visualmente
+      if(alreadyResolved && sum!==TARGET_SUM){
+        cells.forEach(cell=>cell.classList.remove('resolved'));
+      }
+
+      if(filled && sum===TARGET_SUM && !alreadyResolved){
+        showOk();
+        cells.forEach(cell=>cell.classList.add('resolved'));
+        correctBlocks++;
+      }else if(filled && sum!==TARGET_SUM){
+        showBlockError=true;
+      }else if(filled && sum===TARGET_SUM && alreadyResolved){
+        correctBlocks++;
+      }
     }
   }
-</script>
 
+  if(showBlockError){
+    showError();
+    statusEl.textContent='Este bloque no suma 44';
+  }else if(correctBlocks===4){
+    statusEl.textContent='¡Reto completado!';
+    showFinal();
+  }else{
+    statusEl.textContent='Vas bien…';
+  }
+}
+
+function showOk(){
+  const o=document.getElementById('okMark');
+  o.style.display='flex';
+  setTimeout(()=>o.style.display='none',500);
+}
+function showFinal(){
+  document.getElementById('finalPopup').style.display='flex';
+}
+
+function closeFinal(){
+  document.getElementById('finalPopup').style.display='none';
+}
+
+function showError(){
+  const e=document.getElementById('errorMark');
+  e.style.display='flex';
+  setTimeout(()=>e.style.display='none',600);
+}
+</script>
 </body>
 </html>
